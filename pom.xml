@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.bmarwell</groupId>
@@ -11,7 +9,73 @@
   <properties>
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <project.java.mainClass>io.github.bmarwell.betterbranch.BetterBranch</project.java.mainClass>
+    <native.quick.build>true</native.quick.build>
+    <binary.name>betterbranch</binary.name>
+
+    <!-- formatting -->
+    <plugin.spotless.version>3.8.0</plugin.spotless.version>
+    <spotless.palantir.version>2.96.0</spotless.palantir.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>1.0.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.eclipse.jgit</groupId>
+        <artifactId>org.eclipse.jgit</artifactId>
+        <version>7.7.0.202606012155-r</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>2.0.18</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>2.0.18</version>
+        <scope>runtime</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>com.palantir.javaformat</groupId>
+        <artifactId>palantir-java-format</artifactId>
+        <version>${spotless.palantir.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.eclipse.jgit</groupId>
+      <artifactId>org.eclipse.jgit</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <pluginManagement>
@@ -76,9 +140,91 @@
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.5.0</version>
         </plugin>
+
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${plugin.spotless.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.graalvm.buildtools</groupId>
+          <artifactId>native-maven-plugin</artifactId>
+          <version>1.1.4</version>
+          <extensions>true</extensions>
+        </plugin>
       </plugins>
     </pluginManagement>
 
+    <plugins>
+
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <inherited>true</inherited>
+        <configuration>
+          <java>
+            <toggleOffOn />
+
+            <palantirJavaFormat>
+              <version>${spotless.palantir.version}</version>
+              <style>PALANTIR</style>
+              <formatJavadoc>true</formatJavadoc>
+            </palantirJavaFormat>
+
+            <importOrder />
+            <removeUnusedImports />
+            <trimTrailingWhitespace />
+            <endWithNewline />
+            <formatAnnotations />
+          </java>
+
+          <pom>
+            <!-- These are the defaults, you can override if you want -->
+            <includes>
+              <include>pom.xml</include>
+            </includes>
+
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+              <!-- https://issues.apache.org/jira/browse/MRELEASE-1111 -->
+              <spaceBeforeCloseEmptyElement>true</spaceBeforeCloseEmptyElement>
+            </sortPom>
+          </pom>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <mainClass>${project.java.mainClass}</mainClass>
+          <quickBuild>${native.quick.build}</quickBuild>
+          <imageName>${binary.name}-${project.version}</imageName>
+          <agentResourceDirectory>${project.basedir}/src/main/graalvm-native</agentResourceDirectory>
+
+          <jvmArgs>
+            <jvmArg>-Duser.language=en</jvmArg>
+            <jvmArg>-Duser.country=US</jvmArg>
+          </jvmArgs>
+
+          <systemProperties>
+            <user.language>en</user.language>
+            <user.country>US</user.country>
+          </systemProperties>
+        </configuration>
+        <executions>
+          <execution>
+            <id>build-native</id>
+            <goals>
+              <goal>compile-no-fork</goal>
+            </goals>
+            <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 
 </project>
