@@ -7,9 +7,7 @@
 :source-highlighter: rouge
 :repo-url: https://github.com/bmarwell/betterbranch
 
-image::https://img.shields.io/github/license/bmarwell/betterbranch.svg[License, link="https://opensource.org/licenses/EUPL-1.2"]
-image::https://img.shields.io/github/v/release/bmarwell/betterbranch.svg[Latest Release]
-image::https://img.shields.io/github/actions/workflow/status/bmarwell/betterbranch/ci.yml?branch=main&label=CI[CI Status]
+image:https://img.shields.io/badge/License-EUPLv1.2-blue[License, link="https://opensource.org/licenses/EUPL-1.2"]
 
 toc::[]
 
@@ -38,30 +36,57 @@ The latest pre‑compiled binary can be downloaded from the GitHub releases page
 https://github.com/bmarwell/betterbranch/releases/latest
 ----
 
-Choose the binary that matches your OS/architecture (e.g. `betterbranch-linux-amd64`, `betterbranch-macos-arm64`, `betterbranch-windows-amd64.exe`).
+Choose the binary that matches your OS/architecture (e.g. `betterbranch-linux-amd64`, `betterbranch-osx-aarch_64`, `betterbranch-windows-amd64.exe`).
+
+[[install-alias]]
+=== Install the `git bb` alias (optional)
+
+The binary can be copied to any directory that is on your `$PATH`.
+You can create a global Git alias that simply runs the executable:
+
+[source,sh]
+----
+# (1) Put the compiled binary into ~/.local/bin
+#     (the file name may differ per platform – e.g. betterbranch-osx-aarch_64)
+mv betterbranch-osx-aarch_64 ~/.local/bin/betterbranch
+
+# (2) Make it executable
+chmod +x ~/.local/bin/betterbranch
+
+# (3) Add a global Git alias called “bb”
+git config --global alias.bb '!~/.local/bin/betterbranch'
+----
+
+That’s it – the alias is a single line in your global ~/.gitconfig:
+
+[source,ini]
+----
+[alias]
+    bb = !~/.local/bin/betterbranch
+----
 
 [[usage]]
 == Usage
 
 [source,shell]
 ----
-# Show help
-./betterbranch --help
-
 # Default: compare every branch against the current HEAD
 ./betterbranch
 
-# Specify a different reference branch
-./betterbranch --ref main
+# or with the optional alias
+git bb
+----
 
-# Disable colour output
-./betterbranch --no-color
 The output format is:
 
-Ahead  Behind  Branch          Last Commit
------  ------  --------------- --------------------
-29     312     3.3.x           5 weeks ago
-5      397     maintain/3.2    5 months ago
+[listing]
+----
+Ahead Behind Branch                                             Last Commit
+----- ----- -------------------------------------------------- --------------------
+0     0     main                                               1 day, 2 hours ago
+2     28    error_prone                                        3 months, 14 days ago
+1     376   mvn4_cleanup                                       8 months, 2 days ago
+1     1628  v2.1.1                                             3 years, 1 month ago
 ----
 
 [[building-from-source]]
