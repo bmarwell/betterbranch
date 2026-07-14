@@ -6,6 +6,15 @@
   <artifactId>betterbranch</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
+  <licenses>
+    <license>
+      <name>European Union Public Licence (EUPL) v1.2</name>
+      <url>https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12</url>
+      <distribution>repo</distribution>
+      <comments>SPDX‑License‑Identifier: EUPL-1.2</comments>
+    </license>
+  </licenses>
+
   <properties>
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -13,6 +22,7 @@
     <project.java.mainClass>io.github.bmarwell.betterbranch.BetterBranch</project.java.mainClass>
     <native.quick.build>true</native.quick.build>
     <binary.name>betterbranch</binary.name>
+    <license.spdx.id>EUPL-1.2</license.spdx.id>
 
     <!-- formatting -->
     <plugin.spotless.version>3.8.0</plugin.spotless.version>
@@ -201,7 +211,7 @@
         <configuration>
           <mainClass>${project.java.mainClass}</mainClass>
           <quickBuild>${native.quick.build}</quickBuild>
-          <imageName>${binary.name}-${project.version}</imageName>
+          <imageName>${binary.name}-${nisse.os.classifier}</imageName>
           <agentResourceDirectory>${project.basedir}/src/main/graalvm-native</agentResourceDirectory>
 
           <jvmArgs>

@@ -1,0 +1,113 @@
+= BetterBranch
+:toc:
+:toc-placement!:
+:sectnums:
+:sectanchors:
+:icons: font
+:source-highlighter: rouge
+:repo-url: https://github.com/bmarwell/betterbranch
+
+image::https://img.shields.io/github/license/bmarwell/betterbranch.svg[License, link="https://opensource.org/licenses/EUPL-1.2"]
+image::https://img.shields.io/github/v/release/bmarwell/betterbranch.svg[Latest Release]
+image::https://img.shields.io/github/actions/workflow/status/bmarwell/betterbranch/ci.yml?branch=main&label=CI[CI Status]
+
+toc::[]
+
+[[overview]]
+== Overview
+
+**BetterBranch** is a tiny command‑line tool that reports the *ahead/behind* status of all local Git branches relative to a reference branch (by default the currently checked‑out branch).
+The tool is compiled to a **single static native binary** with GraalVM, so it runs without any JDK or external dependencies.
+
+[[features]]
+== Features
+
+* Lists all local branches sorted by the author date of their tip commit.
+* Shows the number of commits a branch is **ahead** of and **behind** the reference branch.
+* Human‑readable age of the last commit (e.g. “5 weeks ago”, “2 years, 3 months ago”).
+* Optional ANSI colour output when the terminal supports it.
+* Zero‑runtime footprint – just a single executable file.
+
+[[download]]
+== Download
+
+The latest pre‑compiled binary can be downloaded from the GitHub releases page:
+
+[listing]
+----
+https://github.com/bmarwell/betterbranch/releases/latest
+----
+
+Choose the binary that matches your OS/architecture (e.g. `betterbranch-linux-amd64`, `betterbranch-macos-arm64`, `betterbranch-windows-amd64.exe`).
+
+[[usage]]
+== Usage
+
+[source,shell]
+----
+# Show help
+./betterbranch --help
+
+# Default: compare every branch against the current HEAD
+./betterbranch
+
+# Specify a different reference branch
+./betterbranch --ref main
+
+# Disable colour output
+./betterbranch --no-color
+The output format is:
+
+Ahead  Behind  Branch          Last Commit
+-----  ------  --------------- --------------------
+29     312     3.3.x           5 weeks ago
+5      397     maintain/3.2    5 months ago
+----
+
+[[building-from-source]]
+== Building from Source
+
+If you prefer to build the binary yourself, you need GraalVM 22+ (or any version that supports native image generation).
+
+=== Clone the repository
+
+[source,shell]
+----
+git clone https://github.com/bmarwell/betterbranch.git
+cd betterbranch
+----
+
+=== Build the native image (requires GraalVM `native-image` tool)
+
+[source,shell]
+----
+# Maven wrapper, uses GraalVM for the binary
+./mvnw verify
+
+# for an optimized build
+./mvnw verify -Dnative.quick.build=false
+----
+
+The resulting executable will be in `target/`.
+The build produces a statically linked binary that can be copied to any machine with the same OS/architecture, without installing a JVM.
+
+[[contributing]]
+== Contributing
+
+Contributions are welcome! Please follow these steps:
+
+Fork the repository.
+Create a feature branch (git switch -c feature/awesome‑feature).
+Make your changes and ensure the native image builds successfully.
+Open a Pull Request against the main branch.
+For major changes, open an issue first to discuss the proposal.
+
+== Support
+
+If you encounter bugs or have feature requests, open an issue on the GitHub tracker. For usage questions, feel free to start a discussion in the repository’s Discussions tab.
+
+== License
+
+BetterBranch is licensed under the European Union Public Licence (EUPL) v1.2.
+
+// SPDX-License-Identifier: EUPL-1.2
