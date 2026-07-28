@@ -20,6 +20,8 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
 
     private static final String SETUP_REPO_WINDOWS_SCRIPT = "/it/setup-repo.cmd";
     private static final String SETUP_REPO_UNIX_SCRIPT = "/it/setup-repo.sh";
+    private static final int WINDOWS_DELETE_RETRIES = 10;
+    private static final long WINDOWS_DELETE_RETRY_DELAY_MILLIS = 100L;
     private static final ExtensionContext.Namespace NAMESPACE =
             ExtensionContext.Namespace.create(IntegrationTestWorkspaceExtension.class);
 
@@ -148,13 +150,38 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
             try (var stream = Files.walk(rootDirectory)) {
                 stream.sorted((a, b) -> b.compareTo(a)).forEach(path -> {
                     try {
-                        Files.deleteIfExists(path);
+                        deleteWithRetry(path);
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
                 });
             } catch (UncheckedIOException e) {
                 throw e.getCause();
+            }
+        }
+
+        private static void deleteWithRetry(Path path) throws IOException {
+            IOException lastException = null;
+            int attempts = isWindows() ? WINDOWS_DELETE_RETRIES : 1;
+            for (int attempt = 1; attempt <= attempts; attempt++) {
+                try {
+                    Files.deleteIfExists(path);
+                    return;
+                } catch (IOException e) {
+                    lastException = e;
+                    if (attempt == attempts) {
+                        throw e;
+                    }
+                    try {
+                        Thread.sleep(WINDOWS_DELETE_RETRY_DELAY_MILLIS);
+                    } catch (InterruptedException interruptedException) {
+                        Thread.currentThread().interrupt();
+                        throw new IOException("Interrupted while deleting " + path, interruptedException);
+                    }
+                }
+            }
+            if (lastException != null) {
+                throw lastException;
             }
         }
     }
