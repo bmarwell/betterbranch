@@ -158,6 +158,7 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
                 });
             } catch (UncheckedIOException e) {
                 if (isWindows() && e.getCause() instanceof AccessDeniedException) {
+                    System.err.println("Skipping best-effort IT workspace cleanup on Windows: " + e.getCause().getMessage());
                     return;
                 }
                 throw e.getCause();
