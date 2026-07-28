@@ -21,6 +21,7 @@
 
     <project.java.mainClass>io.github.bmarwell.betterbranch.BetterBranch</project.java.mainClass>
     <native.quick.build>true</native.quick.build>
+    <native.skip>false</native.skip>
     <binary.name>betterbranch</binary.name>
     <license.spdx.id>EUPL-1.2</license.spdx.id>
 
@@ -61,6 +62,13 @@
         <artifactId>palantir-java-format</artifactId>
         <version>${spotless.palantir.version}</version>
       </dependency>
+
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>5.13.4</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -85,6 +93,12 @@
       <artifactId>slf4j-simple</artifactId>
       <scope>runtime</scope>
     </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -99,6 +113,11 @@
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
           <version>3.3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>3.5.6</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -205,10 +224,24 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
         <extensions>true</extensions>
         <configuration>
+          <skip>${native.skip}</skip>
           <mainClass>${project.java.mainClass}</mainClass>
           <quickBuild>${native.quick.build}</quickBuild>
           <imageName>${binary.name}-${nisse.os.classifier}</imageName>

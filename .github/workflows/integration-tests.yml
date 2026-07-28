@@ -1,0 +1,38 @@
+name: Integration Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  integration-tests:
+    name: Integration Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Run integration tests (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: ./mvnw -B -ntp verify -Dnative.skip=true
+
+      - name: Run integration tests (Windows)
+        if: runner.os == 'Windows'
+        run: .\mvnw.cmd -B -ntp verify '-Dnative.skip=true'
