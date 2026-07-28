@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
@@ -156,6 +157,9 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
                     }
                 });
             } catch (UncheckedIOException e) {
+                if (isWindows() && e.getCause() instanceof AccessDeniedException) {
+                    return;
+                }
                 throw e.getCause();
             }
         }
