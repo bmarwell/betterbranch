@@ -51,14 +51,13 @@ class BetterBranchDistroIT {
                         "BETTERBRANCH_TEST_CLASSPATH",
                         System.getProperty("surefire.test.class.path", System.getProperty("java.class.path")));
         processBuilder.environment().put("BETTERBRANCH_TEST_MODULE_PATH", System.getProperty("jdk.module.path", ""));
+        processBuilder.redirectErrorStream(true);
 
         Process process = processBuilder.start();
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        try (InputStream inputStream = process.getInputStream();
-                InputStream errorStream = process.getErrorStream()) {
+        try (InputStream inputStream = process.getInputStream()) {
             inputStream.transferTo(output);
-            errorStream.transferTo(output);
         }
 
         return new CommandResult(process.waitFor(), output.toString(StandardCharsets.UTF_8));

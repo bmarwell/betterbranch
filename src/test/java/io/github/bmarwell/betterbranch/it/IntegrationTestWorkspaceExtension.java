@@ -89,14 +89,14 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
 
     private static void runCommand(List<String> command, Path workingDirectory, String action)
             throws IOException, InterruptedException {
-        Process process =
-                new ProcessBuilder(command).directory(workingDirectory.toFile()).start();
+        Process process = new ProcessBuilder(command)
+                .directory(workingDirectory.toFile())
+                .redirectErrorStream(true)
+                .start();
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (InputStream inputStream = process.getInputStream();
-                InputStream errorStream = process.getErrorStream()) {
+        try (InputStream inputStream = process.getInputStream()) {
             inputStream.transferTo(output);
-            errorStream.transferTo(output);
         }
 
         int exitCode = process.waitFor();
@@ -146,7 +146,7 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
 
     public record Workspace(
             Path rootDirectory, Path repositoryDirectory, Path flatLayoutLauncher, Path nestedLayoutLauncher)
-            implements AutoCloseable {
+            implements AutoCloseable, ExtensionContext.Store.CloseableResource {
         @Override
         public void close() throws IOException {
             if (!Files.exists(rootDirectory)) {
