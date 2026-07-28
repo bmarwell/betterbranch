@@ -26,7 +26,7 @@
     <license.spdx.id>EUPL-1.2</license.spdx.id>
 
     <!-- formatting -->
-    <plugin.spotless.version>3.8.0</plugin.spotless.version>
+    <plugin.spotless.version>3.9.0</plugin.spotless.version>
     <spotless.palantir.version>2.96.0</spotless.palantir.version>
   </properties>
 
