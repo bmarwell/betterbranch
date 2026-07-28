@@ -161,14 +161,12 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
         }
 
         private static void deleteWithRetry(Path path) throws IOException {
-            IOException lastException = null;
             int attempts = isWindows() ? WINDOWS_DELETE_RETRIES : 1;
             for (int attempt = 1; attempt <= attempts; attempt++) {
                 try {
                     Files.deleteIfExists(path);
                     return;
                 } catch (IOException e) {
-                    lastException = e;
                     if (attempt == attempts) {
                         throw e;
                     }
@@ -179,9 +177,6 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
                         throw new IOException("Interrupted while deleting " + path, interruptedException);
                     }
                 }
-            }
-            if (lastException != null) {
-                throw lastException;
             }
         }
     }
