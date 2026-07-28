@@ -44,12 +44,7 @@ public final class OutputPrinter {
             }
 
             var msgformat = String.format(Locale.ROOT, "%%-%ds ", column.width());
-            System.out.printf(
-                    Locale.ROOT,
-                    msgformat,
-                    column.ansiColourCode(),
-                    column.valueExtractor().apply(commitBranchInfo),
-                    RESET);
+            System.out.printf(Locale.ROOT, msgformat, column.valueExtractor().apply(commitBranchInfo));
         }
 
         System.out.println();

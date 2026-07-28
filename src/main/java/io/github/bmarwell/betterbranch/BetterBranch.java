@@ -21,6 +21,10 @@ public class BetterBranch {
     private static final Comparator<ShallowBranch> BY_COMMITTERDATE_SHALLOW =
             Comparator.comparing(ShallowBranch::commitTime).reversed();
 
+    public static void main(String[] args) {
+        main();
+    }
+
     static void main() {
         try (var repository = new FileRepositoryBuilder()
                         .setGitDir(Paths.get(".", ".git").toFile())
