@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class IntegrationTestWorkspaceExtension implements BeforeEachCallback, ParameterResolver {
 
@@ -25,10 +27,12 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
     private static final long WINDOWS_DELETE_RETRY_DELAY_MILLIS = 100L;
     private static final ExtensionContext.Namespace NAMESPACE =
             ExtensionContext.Namespace.create(IntegrationTestWorkspaceExtension.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTestWorkspaceExtension.class);
 
     @Override
     public void beforeEach(ExtensionContext context) {
-        context.getStore(NAMESPACE).getOrComputeIfAbsent(context.getUniqueId(), unused -> createWorkspace(), Workspace.class);
+        context.getStore(NAMESPACE)
+                .getOrComputeIfAbsent(context.getUniqueId(), unused -> createWorkspace(), Workspace.class);
     }
 
     @Override
@@ -85,10 +89,12 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
 
     private static void runCommand(List<String> command, Path workingDirectory, String action)
             throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(command).directory(workingDirectory.toFile()).start();
+        Process process =
+                new ProcessBuilder(command).directory(workingDirectory.toFile()).start();
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        try (InputStream inputStream = process.getInputStream(); InputStream errorStream = process.getErrorStream()) {
+        try (InputStream inputStream = process.getInputStream();
+                InputStream errorStream = process.getErrorStream()) {
             inputStream.transferTo(output);
             errorStream.transferTo(output);
         }
@@ -97,7 +103,8 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
         if (exitCode != 0) {
             String commandLine = String.join(" ", command);
             String combinedOutput = output.toString(StandardCharsets.UTF_8);
-            throw new IllegalStateException("Failed " + action + " with command " + commandLine + ":\n" + combinedOutput);
+            throw new IllegalStateException(
+                    "Failed " + action + " with command " + commandLine + ":\n" + combinedOutput);
         }
     }
 
@@ -134,9 +141,7 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
     }
 
     private static boolean isWindows() {
-        return System.getProperty("os.name", "")
-                .toLowerCase(Locale.ROOT)
-                .contains("win");
+        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
     }
 
     public record Workspace(
@@ -159,7 +164,7 @@ public final class IntegrationTestWorkspaceExtension implements BeforeEachCallba
             } catch (UncheckedIOException e) {
                 IOException cause = e.getCause();
                 if (isWindows() && cause instanceof AccessDeniedException) {
-                    System.err.println("Skipping best-effort IT workspace cleanup on Windows: " + cause.getMessage());
+                    LOGGER.warn("Skipping best-effort IT workspace cleanup on Windows: {}", cause.getMessage(), cause);
                     return;
                 }
                 throw cause;

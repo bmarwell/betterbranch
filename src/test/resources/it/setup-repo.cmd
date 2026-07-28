@@ -10,6 +10,7 @@ cd /d "%repo_dir%"
 git init || exit /b 1
 git config user.name "BetterBranch IT" || exit /b 1
 git config user.email "it@betterbranch.invalid" || exit /b 1
+git config commit.gpgsign false || exit /b 1
 
 echo base> story.txt
 git add story.txt || exit /b 1

@@ -8,6 +8,7 @@ cd "$repo_dir"
 git init
 git config user.name "BetterBranch IT"
 git config user.email "it@betterbranch.invalid"
+git config commit.gpgsign false
 
 echo "base" > story.txt
 git add story.txt

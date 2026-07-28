@@ -35,30 +35,28 @@ class BetterBranchDistroIT {
 
     private static CommandResult runDistroLauncher(Path launcher, Path repositoryDirectory)
             throws IOException, InterruptedException {
-        List<String> command = isWindows()
-                ? List.of("cmd", "/c", launcher.toString())
-                : List.of(launcher.toString());
+        List<String> command = isWindows() ? List.of("cmd", "/c", launcher.toString()) : List.of(launcher.toString());
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         processBuilder.directory(repositoryDirectory.toFile());
-        processBuilder.environment()
+        processBuilder
+                .environment()
                 .put(
                         "BETTERBRANCH_TEST_JAVA",
                         Path.of(System.getProperty("java.home"), "bin", isWindows() ? "java.exe" : "java")
                                 .toString());
-        processBuilder.environment()
+        processBuilder
+                .environment()
                 .put(
                         "BETTERBRANCH_TEST_CLASSPATH",
                         System.getProperty("surefire.test.class.path", System.getProperty("java.class.path")));
-        processBuilder.environment()
-                .put(
-                        "BETTERBRANCH_TEST_MODULE_PATH",
-                        System.getProperty("jdk.module.path", ""));
+        processBuilder.environment().put("BETTERBRANCH_TEST_MODULE_PATH", System.getProperty("jdk.module.path", ""));
 
         Process process = processBuilder.start();
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        try (InputStream inputStream = process.getInputStream(); InputStream errorStream = process.getErrorStream()) {
+        try (InputStream inputStream = process.getInputStream();
+                InputStream errorStream = process.getErrorStream()) {
             inputStream.transferTo(output);
             errorStream.transferTo(output);
         }
@@ -77,7 +75,9 @@ class BetterBranchDistroIT {
     }
 
     private static void assertContains(String output, String regex) {
-        assertTrue(Pattern.compile(regex).matcher(output).find(), () -> "Output did not match regex: " + regex + "\n" + output);
+        assertTrue(
+                Pattern.compile(regex).matcher(output).find(),
+                () -> "Output did not match regex: " + regex + "\n" + output);
     }
 
     private static String stripAnsi(String output) {
@@ -85,9 +85,7 @@ class BetterBranchDistroIT {
     }
 
     private static boolean isWindows() {
-        return System.getProperty("os.name", "")
-                .toLowerCase(Locale.ROOT)
-                .contains("win");
+        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
     }
 
     private record CommandResult(int exitCode, String output) {}

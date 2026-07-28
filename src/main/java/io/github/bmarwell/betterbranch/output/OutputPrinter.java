@@ -30,21 +30,15 @@ public final class OutputPrinter {
     }
 
     public static void printLine(BranchInfo.CommitBranchInfo commitBranchInfo) {
+        boolean supportsAnsi = AnsiSupport.supportsAnsi();
         for (Column column : COLUMNS) {
-            if (AnsiSupport.supportsAnsi()) {
-                var msgformat = String.format(Locale.ROOT, "%%s%%-%ds%%s ", column.width());
-                System.out.printf(
-                        Locale.ROOT,
-                        msgformat,
-                        column.ansiColourCode(),
-                        column.valueExtractor().apply(commitBranchInfo),
-                        RESET);
-
-                continue;
-            }
-
-            var msgformat = String.format(Locale.ROOT, "%%-%ds ", column.width());
-            System.out.printf(Locale.ROOT, msgformat, column.valueExtractor().apply(commitBranchInfo));
+            var msgformat = String.format(Locale.ROOT, "%%s%%-%ds%%s ", column.width());
+            System.out.printf(
+                    Locale.ROOT,
+                    msgformat,
+                    supportsAnsi ? column.ansiColourCode() : "",
+                    column.valueExtractor().apply(commitBranchInfo),
+                    supportsAnsi ? RESET : "");
         }
 
         System.out.println();
