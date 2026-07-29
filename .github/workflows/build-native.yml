@@ -1,0 +1,54 @@
+name: Build Native
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      head_sha:
+        description: The commit SHA to checkout
+        required: false
+        type: string
+
+jobs:
+  build-native:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x64
+            os: ubuntu-latest
+          - target: macos-aarch64
+            os: macos-14
+          - target: windows-x64
+            os: windows-2022
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.head_sha || github.sha }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: 25
+          distribution: graalvm
+          cache: maven
+
+      - name: Build native executable
+        shell: bash
+        run: ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress package
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: artifacts-${{ matrix.target }}
+          if-no-files-found: error
+          path: |
+            target/betterbranch*
+            target/*.jar
