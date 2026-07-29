@@ -270,4 +270,30 @@
     </plugins>
   </build>
 
+  <profiles>
+    <profile>
+      <id>dist-linux</id>
+      <activation>
+        <os>
+          <family>linux</family>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <configuration>
+              <buildArgs>
+                <buildArg>--static</buildArg>
+                <buildArg>-march=compatibility</buildArg>
+                <buildArg>--libc=musl</buildArg>
+              </buildArgs>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
 </project>
