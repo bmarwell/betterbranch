@@ -237,6 +237,55 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>resolve-dependency-jar-paths</id>
+            <goals>
+              <goal>properties</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <!--
+              GraalVM native-image's static analysis embeds the code-signing certificate
+              chain of signed dependency jars (org.eclipse.jgit is signed by the Eclipse
+              Foundation) as heap constants. This fails the build with
+              "Type not found during analysis: ... X509CertInfo" because that embedded
+              type is never itself marked reachable. Nothing in betterbranch verifies this
+              jar signature at runtime, so stripping it works around the GraalVM bug
+              without affecting behavior.
+            -->
+            <id>strip-jgit-jar-signature</id>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <phase>process-classes</phase>
+            <configuration>
+              <target>
+                <zip destfile="${org.eclipse.jgit:org.eclipse.jgit:jar}.unsigned">
+                  <zipfileset src="${org.eclipse.jgit:org.eclipse.jgit:jar}">
+                    <exclude name="META-INF/*.SF" />
+                    <exclude name="META-INF/*.RSA" />
+                    <exclude name="META-INF/*.DSA" />
+                  </zipfileset>
+                </zip>
+                <move file="${org.eclipse.jgit:org.eclipse.jgit:jar}.unsigned" overwrite="true" tofile="${org.eclipse.jgit:org.eclipse.jgit:jar}" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
         <extensions>true</extensions>
