@@ -171,6 +171,12 @@
         </plugin>
 
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>3.6.0</version>
+        </plugin>
+
+        <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
           <version>${plugin.spotless.version}</version>
@@ -236,6 +242,118 @@
         </executions>
       </plugin>
 
+      <!--
+        org.eclipse.jgit is a signed jar. GraalVM's native-image analysis embeds the signer's
+        X.509 certificate chain as an image-heap constant, but never marks the backing
+        sun.security.x509.* classes as reachable/instantiated, which makes the build fail
+        with "Type not found during analysis" / "not marked as instantiated" errors.
+        There is no supported native-image flag to disable this; the accepted workaround
+        (also used by other GraalVM+JGit consumers) is to feed native-image an unsigned copy
+        of the jar. To avoid ever touching the shared, properly-signed jar in ~/.m2, we
+        unpack jgit into target/, strip only the signature files there, and re-zip it. This
+        copy is used exclusively for the native-image build below, via its own classpath.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-jgit-for-native-image</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeArtifactIds>org.eclipse.jgit</includeArtifactIds>
+              <excludes>META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA</excludes>
+              <outputDirectory>${project.build.directory}/jgit-unsigned-classes</outputDirectory>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>repackage-unsigned-jgit</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <jar destfile="${project.build.directory}/jgit-unsigned.jar"
+                     basedir="${project.build.directory}/jgit-unsigned-classes" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--
+        native-maven-plugin's <classpath> override (used below to swap in jgit-unsigned.jar)
+        replaces Maven's automatic dependency resolution entirely, so every other runtime
+        dependency has to be listed explicitly too. Copy them here (with fixed, version-free
+        file names) so the native-image classpath can reference plain, literal file paths.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-jgit-for-native-image</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeArtifactIds>org.eclipse.jgit</includeArtifactIds>
+              <excludes>META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA</excludes>
+              <outputDirectory>${project.build.directory}/jgit-unsigned-classes</outputDirectory>
+              <overWriteReleases>true</overWriteReleases>
+              <overWriteSnapshots>true</overWriteSnapshots>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-other-runtime-deps-for-native-image</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <excludeArtifactIds>org.eclipse.jgit</excludeArtifactIds>
+              <includeScope>runtime</includeScope>
+              <stripVersion>true</stripVersion>
+              <outputDirectory>${project.build.directory}/native-image-libs</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>repackage-unsigned-jgit</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <jar destfile="${project.build.directory}/jgit-unsigned.jar"
+                     basedir="${project.build.directory}/jgit-unsigned-classes" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
       <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
@@ -246,6 +364,16 @@
           <quickBuild>${native.quick.build}</quickBuild>
           <imageName>${binary.name}-${nisse.os.classifier}</imageName>
           <agentResourceDirectory>${project.basedir}/src/main/graalvm-native</agentResourceDirectory>
+
+          <classpath>
+            <classpath>${project.build.directory}/${project.build.finalName}.jar</classpath>
+            <classpath>${project.build.directory}/jgit-unsigned.jar</classpath>
+            <classpath>${project.build.directory}/native-image-libs/jspecify.jar</classpath>
+            <classpath>${project.build.directory}/native-image-libs/JavaEWAH.jar</classpath>
+            <classpath>${project.build.directory}/native-image-libs/commons-codec.jar</classpath>
+            <classpath>${project.build.directory}/native-image-libs/slf4j-api.jar</classpath>
+            <classpath>${project.build.directory}/native-image-libs/slf4j-simple.jar</classpath>
+          </classpath>
 
           <jvmArgs>
             <jvmArg>-Duser.language=en</jvmArg>
