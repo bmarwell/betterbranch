@@ -247,6 +247,10 @@
           <imageName>${binary.name}-${nisse.os.classifier}</imageName>
           <agentResourceDirectory>${project.basedir}/src/main/graalvm-native</agentResourceDirectory>
 
+          <buildArgs>
+            <buildArg>-Djava.security.properties=src/main/native/custom.security</buildArg>
+          </buildArgs>
+
           <jvmArgs>
             <jvmArg>-Duser.language=en</jvmArg>
             <jvmArg>-Duser.country=US</jvmArg>
