@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: Apache-2.0 OR EUPL-1.2
+= Releasing betterbranch
+:toc: macro
+
+This project releases from tags and uses JReleaser for the GitHub release step.
+
+toc::[]
+
+== Overview
+
+Release flow:
+
+1. **Tag the release commit** on `main`
+2. **CI builds native artifacts** from that tag SHA
+3. **JReleaser publishes the GitHub release** from the same tag SHA
+
+The important bit is that the tag commit SHA and the build SHA are identical. The release workflow
+checks out `github.sha` from the tag push, so the native binaries and the release assets come from
+the same commit.
+
+== Build modes
+
+* Normal CI uses the default quick native build.
+* Release builds use the `release` Maven profile.
+* `-O2` is only enabled in the `release` profile.
+* `quickBuild` is disabled only in the `release` profile.
+
+== Native vs archive artifacts
+
+The native-image build uses a shaded, unsigned-copy jar only for native compilation.
+The plain `target/${project.build.finalName}.jar` stays untouched for the JReleaser archive
+distribution.
+
+That archive should contain all dependency jars in `lib/`, including their signature files.
+Do **not** reuse the shaded jar for the archive distribution.
+
+== Release steps
+
+[source,console]
+----
+# create and push the release tag
+git tag v1.0.0
+git push origin v1.0.0
+
+# after CI has built the tag artifacts, download them if needed
+gh run download <run-id> -n release-artifacts-v1.0.0 -D artifacts/
+
+# publish the GitHub release with JReleaser
+./mvnw -N -Prelease -DartifactsDir=artifacts jreleaser:full-release
+----
+
+== Notes
+
+* Tag builds should be the only place where release optimization is enabled.
+* Normal PR and branch CI stays on the quick build path.
+* If you change packaging, keep the archive distribution and the native-image classpath separate.

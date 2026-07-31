@@ -13,6 +13,7 @@ jobs:
     uses: ./.github/workflows/build-native.yml
     with:
       head_sha: ${{ github.sha }}
+      maven_profiles: release
     secrets: inherit
 
   collect-artifacts:

@@ -187,6 +187,12 @@
           <version>1.1.5</version>
           <extensions>true</extensions>
         </plugin>
+
+        <plugin>
+          <groupId>org.jreleaser</groupId>
+          <artifactId>jreleaser-maven-plugin</artifactId>
+          <version>1.25.0</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -327,6 +333,54 @@
   </build>
 
   <profiles>
+    <profile>
+      <id>release</id>
+      <properties>
+        <native.quick.build>false</native.quick.build>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>copy-release-libs</id>
+                <goals>
+                  <goal>copy-dependencies</goal>
+                </goals>
+                <phase>package</phase>
+                <configuration>
+                  <includeScope>runtime</includeScope>
+                  <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                  <prependGroupId>true</prependGroupId>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <configuration>
+              <buildArgs combine.children="append">
+                <buildArg>-O2</buildArg>
+              </buildArgs>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <groupId>org.jreleaser</groupId>
+            <artifactId>jreleaser-maven-plugin</artifactId>
+            <inherited>false</inherited>
+            <configuration>
+              <configFile>${maven.multiModuleProjectDirectory}/jreleaser.toml</configFile>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <profile>
       <id>dist-linux</id>
       <activation>

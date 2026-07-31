@@ -10,6 +10,10 @@ on:
         description: The commit SHA to checkout
         required: false
         type: string
+      maven_profiles:
+        description: Optional Maven profiles
+        required: false
+        type: string
 
 jobs:
   build-native:
@@ -49,7 +53,11 @@ jobs:
       - name: Build native executable
         shell: bash
         run: |
-          ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress -Dnative.quick.build=false package
+          PROFILE_ARGS=""
+          if [ -n "${{ inputs.maven_profiles }}" ]; then
+            PROFILE_ARGS="-P${{ inputs.maven_profiles }}"
+          fi
+          ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress ${PROFILE_ARGS} package
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7.0.1
