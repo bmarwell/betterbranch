@@ -3,13 +3,11 @@ package io.github.bmarwell.betterbranch.it;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.ByteArrayOutputStream;
+import io.github.bmarwell.betterbranch.it.extension.BetterBranchRunner;
+import io.github.bmarwell.betterbranch.it.extension.BetterBranchRunner.CommandResult;
+import io.github.bmarwell.betterbranch.it.extension.GitWorkspace;
+import io.github.bmarwell.betterbranch.it.extension.IntegrationTestWorkspaceExtension;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,47 +18,17 @@ class BetterBranchDistroIT {
     private static final Pattern ANSI_ESCAPE_PATTERN = Pattern.compile("\\u001B\\[[;\\d]*m");
 
     @Test
-    void flatLayoutLauncherPrintsExpectedBranches(IntegrationTestWorkspaceExtension.Workspace workspace)
+    void flatLayoutLauncherPrintsExpectedBranches(GitWorkspace workspace, BetterBranchRunner runner)
             throws IOException, InterruptedException {
-        CommandResult result = runDistroLauncher(workspace.flatLayoutLauncher(), workspace.repositoryDirectory());
+        CommandResult result = runner.runDistroLauncher();
         assertExpectedOutput(result);
     }
 
     @Test
-    void nestedLayoutLauncherPrintsExpectedBranches(IntegrationTestWorkspaceExtension.Workspace workspace)
+    void nestedLayoutLauncherPrintsExpectedBranches(GitWorkspace workspace, BetterBranchRunner runner)
             throws IOException, InterruptedException {
-        CommandResult result = runDistroLauncher(workspace.nestedLayoutLauncher(), workspace.repositoryDirectory());
+        CommandResult result = runner.runDistroLauncher();
         assertExpectedOutput(result);
-    }
-
-    private static CommandResult runDistroLauncher(Path launcher, Path repositoryDirectory)
-            throws IOException, InterruptedException {
-        List<String> command = isWindows() ? List.of("cmd", "/c", launcher.toString()) : List.of(launcher.toString());
-
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.directory(repositoryDirectory.toFile());
-        processBuilder
-                .environment()
-                .put(
-                        "BETTERBRANCH_TEST_JAVA",
-                        Path.of(System.getProperty("java.home"), "bin", isWindows() ? "java.exe" : "java")
-                                .toString());
-        processBuilder
-                .environment()
-                .put(
-                        "BETTERBRANCH_TEST_CLASSPATH",
-                        System.getProperty("surefire.test.class.path", System.getProperty("java.class.path")));
-        processBuilder.environment().put("BETTERBRANCH_TEST_MODULE_PATH", System.getProperty("jdk.module.path", ""));
-        processBuilder.redirectErrorStream(true);
-
-        Process process = processBuilder.start();
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-        try (InputStream inputStream = process.getInputStream()) {
-            inputStream.transferTo(output);
-        }
-
-        return new CommandResult(process.waitFor(), output.toString(StandardCharsets.UTF_8));
     }
 
     private static void assertExpectedOutput(CommandResult commandResult) {
@@ -82,10 +50,4 @@ class BetterBranchDistroIT {
     private static String stripAnsi(String output) {
         return ANSI_ESCAPE_PATTERN.matcher(output).replaceAll("");
     }
-
-    private static boolean isWindows() {
-        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
-    }
-
-    private record CommandResult(int exitCode, String output) {}
 }

@@ -337,6 +337,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <useModulePath>false</useModulePath>
+          <environmentVariables>
+            <BETTERBRANCH_DIR>${project.build.directory}/jreleaser/assemble/betterbranch/java-archive/work/betterbranch-${project.version}/bin</BETTERBRANCH_DIR>
+          </environmentVariables>
+        </configuration>
         <executions>
           <execution>
             <goals>
