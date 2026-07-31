@@ -25,6 +25,13 @@ the same commit.
 * `-O2` is only enabled in the `release` profile.
 * `quickBuild` is disabled only in the `release` profile.
 
+To build a local `-O2` native binary, run:
+
+[source,console]
+----
+./mvnw -Prelease package
+----
+
 == Native vs archive artifacts
 
 The native-image build uses a shaded, unsigned-copy jar only for native compilation.
