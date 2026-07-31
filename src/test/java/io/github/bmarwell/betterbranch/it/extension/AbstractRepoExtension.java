@@ -15,13 +15,16 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractRepoExtension implements BeforeEachCallback, AfterEachCallback, ParameterResolver {
+public abstract class AbstractRepoExtension
+        implements BeforeEachCallback, AfterEachCallback, ExecutionCondition, ParameterResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRepoExtension.class);
 
@@ -82,6 +85,19 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
         }
 
         throw new IllegalArgumentException("unsupported parameter type: " + parameterType);
+    }
+
+    @Override
+    public @NonNull ConditionEvaluationResult evaluateExecutionCondition(@NonNull ExtensionContext context) {
+        if (isWindows() && !supportsWindows()) {
+            return ConditionEvaluationResult.disabled("Test disabled on Windows.");
+        }
+
+        if (!isWindows() && !supportsUnix()) {
+            return ConditionEvaluationResult.disabled("Test disabled on Unix.");
+        }
+
+        return ConditionEvaluationResult.enabled("Test enabled.");
     }
 
     private GitWorkspace createWorkspace() {

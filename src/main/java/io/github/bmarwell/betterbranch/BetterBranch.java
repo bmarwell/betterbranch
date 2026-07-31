@@ -84,37 +84,41 @@ public class BetterBranch {
         }
 
         if (Files.exists(pwdDotGit) && Files.isRegularFile(pwdDotGit)) {
-            // Worktree
-            final List<String> gitFileContents = Files.readAllLines(pwdDotGit);
-
-            if (!gitFileContents.getFirst().contains(": ")) {
-                throw new IllegalArgumentException(
-                        ".git does not contain a correct configuration, expected key-value pairs, but was: "
-                                + gitFileContents);
-            }
-
-            final String gitDirValue = gitFileContents.stream()
-                    .filter(line -> line.startsWith("gitdir: "))
-                    .findFirst()
-                    .map(line -> line.substring("gitdir: ".length()).strip())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            ".git does not contain a correct configuration, expected a 'gitdir' entry, but was: "
-                                    + gitFileContents));
-
-            final Path gitDirPath = Paths.get(gitDirValue);
-
-            if (!Files.isDirectory(gitDirPath)) {
-                throw new IllegalArgumentException(
-                        ".git does not contain a correct path to a git repository, was: [" + gitFileContents + "].");
-            }
-
-            return new FileRepositoryBuilder()
-                    .readEnvironment()
-                    .setWorkTree(pwd.toFile())
-                    .setGitDir(gitDirPath.toFile())
-                    .build();
+            return getRepositoryFromWorktree(pwdDotGit, pwd);
         }
 
         throw new IllegalStateException("Can't find a valid git repository in the current directory.");
+    }
+
+    private static Repository getRepositoryFromWorktree(Path pwdDotGit, Path pwd) throws IOException {
+        // Worktree
+        final List<String> gitFileContents = Files.readAllLines(pwdDotGit);
+
+        if (!gitFileContents.getFirst().contains(": ")) {
+            throw new IllegalArgumentException(
+                    ".git does not contain a correct configuration, expected key-value pairs, but was: "
+                            + gitFileContents);
+        }
+
+        final String gitDirValue = gitFileContents.stream()
+                .filter(line -> line.startsWith("gitdir: "))
+                .findFirst()
+                .map(line -> line.substring("gitdir: ".length()).strip())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        ".git does not contain a correct configuration, expected a 'gitdir' entry, but was: "
+                                + gitFileContents));
+
+        final Path gitDirPath = Paths.get(gitDirValue);
+
+        if (!Files.isDirectory(gitDirPath)) {
+            throw new IllegalArgumentException(
+                    ".git does not contain a correct path to a git repository, was: [" + gitFileContents + "].");
+        }
+
+        return new FileRepositoryBuilder()
+                .readEnvironment()
+                .setWorkTree(pwd.toFile())
+                .setGitDir(gitDirPath.toFile())
+                .build();
     }
 }
