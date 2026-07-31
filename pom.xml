@@ -15,6 +15,42 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+      <id>bmarwell</id>
+      <name>Benjamin Marwell</name>
+      <email>bmarwell@apache.org</email>
+      <roles>
+        <role>maintainer</role>
+      </roles>
+      <timezone>Europe/Berlin</timezone>
+    </developer>
+  </developers>
+
+  <mailingLists>
+    <mailingList>
+      <name>GitHub Discussions</name>
+      <archive>https://github.com/bmarwell/betterbranch/discussions</archive>
+    </mailingList>
+  </mailingLists>
+
+  <scm>
+    <connection>scm:git:https://github.com/bmarwell/betterbranch.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/bmarwell/betterbranch.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://github.com/bmarwell/betterbranch</url>
+  </scm>
+
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/bmarwell/betterbranch/issues</url>
+  </issueManagement>
+
+  <ciManagement>
+    <system>GitHub Actions</system>
+    <url>https://github.com/bmarwell/betterbranch/actions</url>
+  </ciManagement>
+
   <properties>
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
