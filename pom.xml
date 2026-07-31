@@ -216,6 +216,9 @@
                 <exclude>META-INF/*.SF</exclude>
                 <exclude>META-INF/*.DSA</exclude>
                 <exclude>META-INF/*.RSA</exclude>
+                <exclude>META-INF/*.MF</exclude>
+                <exclude>META-INF/LICENSE.txt</exclude>
+                <exclude>META-INF/versions/*/*module-info*.*</exclude>
               </excludes>
             </filter>
           </filters>
@@ -301,6 +304,11 @@
             <jvmArg>-Duser.country=US</jvmArg>
           </jvmArgs>
 
+          <buildArgs>
+            <buildArg>--no-fallback</buildArg>
+            <buildArg>-Ob</buildArg>
+          </buildArgs>
+
           <systemProperties>
             <user.language>en</user.language>
             <user.country>US</user.country>
@@ -333,10 +341,9 @@
             <groupId>org.graalvm.buildtools</groupId>
             <artifactId>native-maven-plugin</artifactId>
             <configuration>
-              <buildArgs>
-                <buildArg>--static</buildArg>
+              <buildArgs combine.children="append">
+                <buildArg>--static-nolibc</buildArg>
                 <buildArg>-march=compatibility</buildArg>
-                <buildArg>--libc=musl</buildArg>
               </buildArgs>
             </configuration>
           </plugin>
