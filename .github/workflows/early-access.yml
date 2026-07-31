@@ -68,8 +68,9 @@ jobs:
             --errors \
             --non-recursive \
             -Prelease \
+            package -DskipTests jreleaser:full-release \
             -DartifactsDir=artifacts \
-            package -DskipTests jreleaser:full-release
+            -Dnative.skip=true
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
