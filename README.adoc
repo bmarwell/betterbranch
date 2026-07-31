@@ -104,6 +104,9 @@ cd betterbranch
 
 === Build the native image (requires GraalVM `native-image` tool)
 
+Note: On Linux, we use `--static-nolibc`. 
+This means that all libraries (including libz) are included statically, except libc.
+
 [source,shell]
 ----
 # Maven wrapper, uses GraalVM for the binary
@@ -111,6 +114,9 @@ cd betterbranch
 
 # for an optimized build
 ./mvnw verify -Dnative.quick.build=false
+
+# for a release build -O2
+./mvnw verify -Prelease
 ----
 
 The resulting executable will be in `target/`.
