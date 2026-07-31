@@ -7,6 +7,7 @@ import io.github.bmarwell.betterbranch.it.extension.BetterBranchRunner.CommandRe
 import io.github.bmarwell.betterbranch.it.extension.GitWorkspace;
 import io.github.bmarwell.betterbranch.it.extension.WorktreeExtension;
 import java.io.IOException;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -14,10 +15,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class WorktreeIT {
 
     @Test
-    void can_run_on_worktree(GitWorkspace workspace, BetterBranchRunner runner) throws IOException, InterruptedException {
-        final CommandResult commandResult = runner.runDistroLauncher();
+    void can_run_on_worktree(GitWorkspace workspace, BetterBranchRunner runner)
+            throws IOException, InterruptedException {
+        final CommandResult commandResult = runner.runDistroLauncher(Path.of("branch1"));
 
-        assertEquals(0, commandResult.exitCode(), "Expected exit code 0 but was: " + commandResult.exitCode() + "; out:\n" + commandResult.output() + "\n");
+        assertEquals(
+                0,
+                commandResult.exitCode(),
+                "Expected exit code 0 but was: " + commandResult.exitCode() + "; out:\n" + commandResult.output()
+                        + "\n");
     }
-
 }

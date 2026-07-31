@@ -8,9 +8,8 @@ import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public record GitWorkspace(
-    Path rootDirectory, Path repositoryDirectory, Path launcher, boolean isWindows)
-    implements AutoCloseable {
+public record GitWorkspace(Path rootDirectory, Path repositoryDirectory, Path launcher, boolean isWindows)
+        implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GitWorkspace.class);
 

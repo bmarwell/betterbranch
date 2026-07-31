@@ -7,13 +7,7 @@ import io.github.bmarwell.betterbranch.it.extension.BetterBranchRunner;
 import io.github.bmarwell.betterbranch.it.extension.BetterBranchRunner.CommandResult;
 import io.github.bmarwell.betterbranch.it.extension.GitWorkspace;
 import io.github.bmarwell.betterbranch.it.extension.IntegrationTestWorkspaceExtension;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +31,6 @@ class BetterBranchDistroIT {
         assertExpectedOutput(result);
     }
 
-
     private static void assertExpectedOutput(CommandResult commandResult) {
         String output = stripAnsi(commandResult.output());
 
@@ -48,16 +41,13 @@ class BetterBranchDistroIT {
         assertContains(output, "(?m)^1\\s+0\\s+feature-two\\s+.+ago\\s*$");
     }
 
-
     private static void assertContains(String output, String regex) {
         assertTrue(
-            Pattern.compile(regex).matcher(output).find(),
-            () -> "Output did not match regex: " + regex + "\n" + output);
+                Pattern.compile(regex).matcher(output).find(),
+                () -> "Output did not match regex: " + regex + "\n" + output);
     }
-
 
     private static String stripAnsi(String output) {
         return ANSI_ESCAPE_PATTERN.matcher(output).replaceAll("");
     }
-
 }

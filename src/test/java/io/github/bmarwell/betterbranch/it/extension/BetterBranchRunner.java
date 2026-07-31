@@ -20,24 +20,16 @@ public class BetterBranchRunner {
         this.repositoryDirectory = repositoryDirectory;
     }
 
-    public CommandResult runDistroLauncher()
-        throws IOException, InterruptedException {
+    public CommandResult runDistroLauncher() throws IOException, InterruptedException {
+        return runDistroLauncher(Path.of("."));
+    }
+
+    public CommandResult runDistroLauncher(Path subdir) throws IOException, InterruptedException {
         List<String> command = isWindows() ? List.of("cmd", "/c", launcher.toString()) : List.of(launcher.toString());
 
         ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.directory(repositoryDirectory.toFile());
-        processBuilder
-            .environment()
-            .put(
-                "BETTERBRANCH_TEST_JAVA",
-                Path.of(System.getProperty("java.home"), "bin", isWindows() ? "java.exe" : "java")
-                    .toString());
-        processBuilder
-            .environment()
-            .put(
-                "BETTERBRANCH_TEST_CLASSPATH",
-                System.getProperty("surefire.test.class.path", System.getProperty("java.class.path")));
-        processBuilder.environment().put("BETTERBRANCH_TEST_MODULE_PATH", System.getProperty("jdk.module.path", ""));
+        processBuilder.directory(repositoryDirectory.resolve(subdir).toFile());
+
         processBuilder.redirectErrorStream(true);
 
         Process process = processBuilder.start();

@@ -8,7 +8,6 @@ public final class WorktreeExtension extends AbstractRepoExtension {
     private static final String SETUP_REPO_UNIX_SCRIPT = "/it/repo-with-workspace.sh";
     private static final Namespace NAMESPACE = Namespace.create(WorktreeExtension.class);
 
-
     @Override
     public Namespace getNamespace() {
         return NAMESPACE;

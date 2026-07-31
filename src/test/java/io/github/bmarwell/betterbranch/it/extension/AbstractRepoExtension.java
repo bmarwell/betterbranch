@@ -39,7 +39,7 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
     public void beforeEach(ExtensionContext context) {
         //noinspection resource
         context.getStore(getNamespace())
-            .computeIfAbsent(context.getUniqueId(), _ -> createWorkspace(), GitWorkspace.class);
+                .computeIfAbsent(context.getUniqueId(), _ -> createWorkspace(), GitWorkspace.class);
     }
 
     @Override
@@ -74,7 +74,8 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
             final GitWorkspace workspace = store.get(extensionContext.getUniqueId(), GitWorkspace.class);
 
             if (workspace == null) {
-                throw new IllegalStateException("GitWorkspace not found in store for unique ID: " + extensionContext.getUniqueId());
+                throw new IllegalStateException(
+                        "GitWorkspace not found in store for unique ID: " + extensionContext.getUniqueId());
             }
 
             return new BetterBranchRunner(workspace, workspace.launcher(), workspace.repositoryDirectory());
@@ -82,7 +83,6 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
 
         throw new IllegalArgumentException("unsupported parameter type: " + parameterType);
     }
-
 
     private GitWorkspace createWorkspace() {
         try {
@@ -102,9 +102,7 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
         }
     }
 
-
-    private void runSetupScript(Path rootDirectory, Path repositoryDirectory)
-        throws IOException, InterruptedException {
+    private void runSetupScript(Path rootDirectory, Path repositoryDirectory) throws IOException, InterruptedException {
         String resourceName = isWindows() ? setupWindowsScript() : setupUnixScript();
         Path setupScript = rootDirectory.resolve(isWindows() ? "setup-repo.cmd" : "setup-repo.sh");
         Files.writeString(setupScript, readResource(resourceName), StandardCharsets.UTF_8);
@@ -122,13 +120,12 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
         return Path.of(betterbranchBin).resolve("betterbranch");
     }
 
-
     private static void runCommand(List<String> command, Path workingDirectory, String action)
-        throws IOException, InterruptedException {
+            throws IOException, InterruptedException {
         Process process = new ProcessBuilder(command)
-            .directory(workingDirectory.toFile())
-            .redirectErrorStream(true)
-            .start();
+                .directory(workingDirectory.toFile())
+                .redirectErrorStream(true)
+                .start();
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try (InputStream inputStream = process.getInputStream()) {
@@ -140,7 +137,7 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
             String commandLine = String.join(" ", command);
             String combinedOutput = output.toString(StandardCharsets.UTF_8);
             throw new IllegalStateException(
-                "Failed " + action + " with command " + commandLine + ":\n" + combinedOutput);
+                    "Failed " + action + " with command " + commandLine + ":\n" + combinedOutput);
         }
     }
 
@@ -157,6 +154,7 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
         if (isWindows()) {
             return List.of("cmd", "/c", scriptPath.toString(), repositoryDirectory.toString());
         }
+
         return List.of("sh", scriptPath.toString(), repositoryDirectory.toString());
     }
 
@@ -167,11 +165,11 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
 
         try {
             Files.setPosixFilePermissions(
-                path,
-                Set.of(
-                    PosixFilePermission.OWNER_READ,
-                    PosixFilePermission.OWNER_WRITE,
-                    PosixFilePermission.OWNER_EXECUTE));
+                    path,
+                    Set.of(
+                            PosixFilePermission.OWNER_READ,
+                            PosixFilePermission.OWNER_WRITE,
+                            PosixFilePermission.OWNER_EXECUTE));
         } catch (UnsupportedOperationException ignored) {
         }
     }
@@ -179,5 +177,4 @@ public abstract class AbstractRepoExtension implements BeforeEachCallback, After
     private static boolean isWindows() {
         return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
     }
-
 }
