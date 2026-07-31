@@ -69,7 +69,7 @@ jobs:
             --non-recursive \
             -Prelease \
             -DartifactsDir=artifacts \
-            jreleaser:full-release
+            package -DskipTests jreleaser:full-release
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
