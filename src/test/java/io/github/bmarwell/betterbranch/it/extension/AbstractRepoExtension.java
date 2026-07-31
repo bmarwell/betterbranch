@@ -130,7 +130,7 @@ public abstract class AbstractRepoExtension
     private static Path createLauncher() throws IOException {
         final String betterbranchBin = System.getenv("BETTERBRANCH_DIR");
         if (isWindows()) {
-            return Path.of(betterbranchBin).resolve("betterbranch.bar");
+            return Path.of(betterbranchBin).resolve("betterbranch.bat");
         }
 
         return Path.of(betterbranchBin).resolve("betterbranch");
