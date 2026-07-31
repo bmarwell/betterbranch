@@ -1,9 +1,14 @@
-name: Publish Early Access builds
+# Inspired by & copied from mthmulders/mcs:
+# https://github.com/mthmulders/mcs/blob/main/.github/workflows/early-access.yml
+# Itself inspired by & copied from JReleaser sample:
+# https://github.com/jreleaser/jreleaser/blob/main/.github/workflows/trigger-early-access.yml
 
+name: Publish Early Access builds
 permissions:
   contents: read
 
 on:
+  # Triggered after the Build workflow completes successfully
   workflow_run:
     workflows: ["Build"]
     types:
@@ -11,14 +16,27 @@ on:
     branches: [ main ]
 
 jobs:
+  # Collect all executables and release
   release:
     runs-on: ubuntu-24.04
-    permissions:
-      actions: read
-      contents: write
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    permissions: write-all
+    # Only run if the Build workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: 25
+          distribution: 'temurin'
+          cache: maven
+
+      # Using third-party action because actions/download-artifact@v5 cannot download from different workflow runs (workflow_run context).
       - name: Download native binary artifacts from Build workflow
         uses: dawidd6/action-download-artifact@v21
         with:
@@ -30,22 +48,37 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts
-          find /tmp/artifacts -type f -exec mv -v {} artifacts/ \;
-          if ! find artifacts -type f -print -quit | grep -q .; then
-            echo "ERROR: No build artifacts downloaded."
-            exit 1
-          fi
+          
+          # Move betterbranch distribution artifacts to artifacts/ directory for JReleaser. Names use platform classifiers from os-detector-maven-plugin.
+          find /tmp/artifacts/ -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec mv -v {} artifacts/ \;
 
-      - name: Publish rolling early access release
+      - name: Cache Maven packages
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Release with JReleaser
         shell: bash
         run: |
-          if gh release view early-access >/dev/null 2>&1; then
-            gh release delete early-access --yes --cleanup-tag
-          fi
-          gh release create early-access artifacts/* \
-            --prerelease \
-            --target "${{ github.event.workflow_run.head_sha }}" \
-            --title "Early Access" \
-            --notes "Automated early access build for ${{ github.event.workflow_run.head_sha }}."
+          ./mvnw \
+            --batch-mode \
+            --strict-checksum \
+            --errors \
+            --non-recursive \
+            -Prelease \
+            -DartifactsDir=artifacts \
+            jreleaser:full-release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+
+      - name: Capture JReleaser output
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: jreleaser-release-output
+          retention-days: 7
+          path: |
+            target/jreleaser/trace.log
+            target/jreleaser/output.properties
