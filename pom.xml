@@ -345,6 +345,11 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <environmentVariables>
+            <BETTERBRANCH_DIR>${project.build.directory}/jreleaser/assemble/betterbranch/java-archive/work/betterbranch-${project.version}/bin</BETTERBRANCH_DIR>
+          </environmentVariables>
+        </configuration>
       </plugin>
 
       <plugin>
