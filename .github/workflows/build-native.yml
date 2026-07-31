@@ -1,0 +1,69 @@
+name: Build Native
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      head_sha:
+        description: The commit SHA to checkout
+        required: false
+        type: string
+      maven_profiles:
+        description: Optional Maven profiles
+        required: false
+        type: string
+
+jobs:
+  build-native:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: linux-x64
+            os: ubuntu-latest
+          - target: macos-aarch64
+            os: macos-14
+          - target: windows-x64
+            os: windows-2022
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.head_sha || github.sha }}
+
+      - name: Install build dependencies on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential zlib1g-dev
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: 25
+          distribution: graalvm
+          cache: maven
+
+      - name: Build native executable
+        shell: bash
+        run: |
+          PROFILE_ARGS=""
+          if [ -n "${{ inputs.maven_profiles }}" ]; then
+            PROFILE_ARGS="-P${{ inputs.maven_profiles }}"
+          fi
+          ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress ${PROFILE_ARGS} package
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: artifacts-${{ matrix.target }}
+          if-no-files-found: error
+          path: |
+            target/betterbranch*
+            target/*.jar

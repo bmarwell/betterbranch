@@ -1,0 +1,54 @@
+name: Build Release Artifacts
+
+permissions:
+  contents: read
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-native:
+    uses: ./.github/workflows/build-native.yml
+    with:
+      head_sha: ${{ github.sha }}
+      maven_profiles: release
+    secrets: inherit
+
+  collect-artifacts:
+    needs: build-native
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+
+    steps:
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v8.0.1
+        with:
+          path: /tmp/artifacts
+
+      - name: Organize artifacts for upload
+        shell: bash
+        run: |
+          mkdir -p release-artifacts
+          if ! find /tmp/artifacts -type f -print -quit | grep -q .; then
+            echo "ERROR: No build artifacts found in /tmp/artifacts/"
+            exit 1
+          fi
+          find /tmp/artifacts -type f -exec cp -v {} release-artifacts/ \;
+          ls -lh release-artifacts/
+
+      - name: Upload consolidated artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: release-artifacts-${{ github.ref_name }}
+          retention-days: 90
+          path: release-artifacts/
+
+      - name: Show download instructions
+        shell: bash
+        run: |
+          echo "::notice::Artifacts uploaded successfully for tag ${{ github.ref_name }}"
+          echo "::notice::To download artifacts locally, run:"
+          echo "::notice::  gh run download ${{ github.run_id }} -n release-artifacts-${{ github.ref_name }} -D artifacts/"

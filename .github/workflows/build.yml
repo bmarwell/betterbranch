@@ -1,0 +1,39 @@
+name: Build
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main, '*', '**/*' ]
+
+jobs:
+  build:
+    if: github.event_name != 'push' || (contains(github.event.head_commit.message, 'Releasing version') != true && contains(github.event.head_commit.message, 'Prepare next version') != true)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: 25
+          distribution: temurin
+          cache: maven
+
+      - name: Build and test all
+        shell: bash
+        run: ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress spotless:check verify -Dnative.skip=true
+
+  call-native:
+    if: github.event_name != 'push' || (contains(github.event.head_commit.message, 'Releasing version') != true && contains(github.event.head_commit.message, 'Prepare next version') != true)
+    needs: build
+    uses: ./.github/workflows/build-native.yml
+    with:
+      head_sha: ${{ github.sha }}
+    secrets: inherit
