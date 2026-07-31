@@ -6,6 +6,12 @@
   <artifactId>betterbranch</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
+  <name>betterbranch</name>
+  <description>BetterBranch is a tiny command‑line tool that reports
+    the ahead/behind status of all local Git branches
+    relative to the current branch.</description>
+  <inceptionYear>2026</inceptionYear>
+
   <licenses>
     <license>
       <name>European Union Public Licence (EUPL) v1.2</name>
