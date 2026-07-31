@@ -64,7 +64,7 @@ jobs:
             --errors \
             --no-transfer-progress \
             ${PROFILE_ARGS} \
-            package
+            verify
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7.0.1
@@ -74,8 +74,8 @@ jobs:
           path: |
             target/betterbranch*
             target/*.jar
-            cli/target/jreleaser/assemble/betterbranch/java-archive/*.zip
-            cli/target/jreleaser/assemble/betterbranch/java-archive/*.tar.gz
+            target/jreleaser/assemble/betterbranch/java-archive/*.zip
+            target/jreleaser/assemble/betterbranch/java-archive/*.tar.gz
 
       - name: Save downloaded Maven packages
         uses: actions/cache/save@v6.1.0
@@ -125,29 +125,35 @@ jobs:
       - name: Build static native image for Linux
         if: matrix.os == 'ubuntu-latest'
         run: |
-          PROFILE_ARGS="-Plinux"
-          if [ -n "${{ inputs.maven_profiles }}" ]; then
-            PROFILE_ARGS="-P${{ inputs.maven_profiles }},linux"
-          fi
-          ./mvnw \
-            --batch-mode \
-            --show-version --strict-checksums --errors --no-transfer-progress \
-            ${PROFILE_ARGS} \
-            package
-
-      - name: Build static native image for Windows / macOS
-        if: matrix.os != 'ubuntu-latest'
-        shell: bash
-        run: |
-          PROFILE_ARGS="-Plinux"
+          PROFILE_ARGS=""
           if [ -n "${{ inputs.maven_profiles }}" ]; then
             PROFILE_ARGS="-P${{ inputs.maven_profiles }}"
           fi
           ./mvnw \
             --batch-mode \
-            --show-version --strict-checksums --errors --no-transfer-progress \
+            --show-version \
+            --strict-checksums \
+            --errors \
+            --no-transfer-progress \
             ${PROFILE_ARGS} \
-            package
+            verify
+
+      - name: Build static native image for Windows / macOS
+        if: matrix.os != 'ubuntu-latest'
+        shell: bash
+        run: |
+          PROFILE_ARGS=""
+          if [ -n "${{ inputs.maven_profiles }}" ]; then
+            PROFILE_ARGS="-P${{ inputs.maven_profiles }}"
+          fi
+          ./mvnw \
+            --batch-mode \
+            --show-version \
+            --strict-checksums \
+            --errors \
+            --no-transfer-progress \
+            ${PROFILE_ARGS} \
+            verify
 
       - name: Save downloaded Maven packages
         uses: actions/cache/save@v6.1.0
@@ -161,6 +167,6 @@ jobs:
         with:
           name: artifacts-${{ matrix.os }}
           path: |
-            cli/target/distributions/*.zip
-            cli/target/distributions/*.tar.gz
+            target/distributions/*.zip
+            target/distributions/*.tar.gz
 
