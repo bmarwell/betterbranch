@@ -23,12 +23,44 @@ jobs:
         uses: actions/setup-java@v5.6.0
         with:
           java-version: 25
-          distribution: temurin
+          distribution: 'temurin'
           cache: maven
+
+      - name: Cache Maven local repository
+        id: restore-maven-package-cache
+        uses: actions/cache@v6.1.0
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m22-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Build and test all
         shell: bash
-        run: ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress spotless:check verify -Dnative.skip=true
+        run: |
+          ./mvnw \
+            --batch-mode \
+            --show-version \
+            --strict-checksums \
+            --errors \
+            --no-transfer-progress \
+            spotless:check verify \
+            -Dnative.skip=true
+
+      - name: Upload JAR archive artifact
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: betterbranch-jar-archive
+          path: |
+            cli/target/jreleaser/assemble/betterbranch/java-archive/*.zip
+            cli/target/jreleaser/assemble/betterbranch/java-archive/*.tar.gz
+          retention-days: 1
+
+      - name: Save downloaded Maven packages
+        uses: actions/cache/save@v6.1.0
+        with:
+          path: ~/.m2
+          key: ${{ steps.restore-maven-package-cache.outputs.cache-hit }}
+        if: github.event_name != 'pull_request'
 
   call-native:
     if: github.event_name != 'push' || (contains(github.event.head_commit.message, 'Releasing version') != true && contains(github.event.head_commit.message, 'Prepare next version') != true)
