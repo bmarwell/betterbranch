@@ -7,7 +7,16 @@
 :source-highlighter: rouge
 :repo-url: https://github.com/bmarwell/betterbranch
 
-image:https://img.shields.io/badge/License-EUPLv1.2-blue[License, link="https://opensource.org/licenses/EUPL-1.2"]
+image:https://github.com/bmarwell/betterbranch/actions/workflows/build.yml/badge.svg[link="https://github.com/bmarwell/betterbranch/actions",alt="Build Status"]
+image:https://img.shields.io/github/v/release/bmarwell/betterbranch?sort=semver&color=green[link="https://github.com/bmarwell/betterbranch/releases",alt="Latest Release"]
+image:https://img.shields.io/badge/GraalVM-Native_Image-orange?logo=graalvm&logoColor=white[GraalVM Native Image]
+image:https://img.shields.io/badge/Java-Apache_Maven-C71A36?logo=apachemaven&logoColor=white[Apache Maven]
+image:https://img.shields.io/github/license/bmarwell/betterbranch?color=blue[link="https://github.com/bmarwell/betterbranch/blob/main/LICENSE", alt="License"]
+image:https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg[BuyMeACoffee,link=https://buymeacoffee.com/bmarwell]
+
+
+[[betterbranch-header-graphic]]
+image::.github/assets/2026-07-31_betterbranch-header-1500x500.png["betterbranch screenshot, a better branch list tool, also known as 'git bb'.",link=.github/assets/2026-07-31_betterbranch-header-1500x500.png,width=100%,alt="betterbranch screenshot in terminal, github header"]
 
 toc::[]
 
