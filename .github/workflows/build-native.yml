@@ -16,19 +16,11 @@ on:
         type: string
 
 jobs:
-  build-native:
-    name: Build ${{ matrix.target }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - target: linux-x64
-            os: ubuntu-latest
-          - target: macos-aarch64
-            os: macos-14
-          - target: windows-x64
-            os: windows-2022
+  # Build linux first for the jreleaser distro, and to see whether the native build will work
+  # so we can skip win/mac if it doesn't.
+  build-linux-x64:
+    name: Build Linux x64
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -50,6 +42,14 @@ jobs:
           distribution: graalvm
           cache: maven
 
+      - name: Cache Maven packages
+        id: restore-maven-package-cache
+        uses: actions/cache/restore@v6.1.0
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
       - name: Build native executable
         shell: bash
         run: |
@@ -57,13 +57,116 @@ jobs:
           if [ -n "${{ inputs.maven_profiles }}" ]; then
             PROFILE_ARGS="-P${{ inputs.maven_profiles }}"
           fi
-          ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress ${PROFILE_ARGS} package
+          ./mvnw \
+            --batch-mode \
+            --show-version \
+            --strict-checksums \
+            --errors \
+            --no-transfer-progress \
+            ${PROFILE_ARGS} \
+            verify
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7.0.1
         with:
-          name: artifacts-${{ matrix.target }}
+          name: artifacts-ubuntu-latest
           if-no-files-found: error
           path: |
             target/betterbranch*
             target/*.jar
+            target/jreleaser/assemble/betterbranch/java-archive/*.zip
+            target/jreleaser/assemble/betterbranch/java-archive/*.tar.gz
+
+      - name: Save downloaded Maven packages
+        uses: actions/cache/save@v6.1.0
+        with:
+          path: ~/.m2
+          key: ${{ steps.restore-maven-package-cache.outputs.cache-primary-key }}
+        if: github.event.workflow_run.event != 'pull_request'
+
+  build-others:
+    name: Build ${{ matrix.target }}
+    needs: build-linux-x64
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: macos-aarch64
+            os: macos-14
+            arch: aarch64
+          - target: windows-x64
+            os: windows-2022
+            arch: x64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
+        with:
+          # Disabling shallow clone is recommended for improving relevancy of reporting
+          fetch-depth: 0
+          ref: ${{ inputs.head_sha || github.sha }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v5.6.0
+        with:
+          java-version: 25
+          distribution: 'graalvm'
+          cache: maven
+
+      - name: Cache Maven packages
+        id: restore-maven-package-cache
+        uses: actions/cache/restore@v6.1.0
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build static native image for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          PROFILE_ARGS=""
+          if [ -n "${{ inputs.maven_profiles }}" ]; then
+            PROFILE_ARGS="-P${{ inputs.maven_profiles }}"
+          fi
+          ./mvnw \
+            --batch-mode \
+            --show-version \
+            --strict-checksums \
+            --errors \
+            --no-transfer-progress \
+            ${PROFILE_ARGS} \
+            verify
+
+      - name: Build static native image for Windows / macOS
+        if: matrix.os != 'ubuntu-latest'
+        shell: bash
+        run: |
+          PROFILE_ARGS=""
+          if [ -n "${{ inputs.maven_profiles }}" ]; then
+            PROFILE_ARGS="-P${{ inputs.maven_profiles }}"
+          fi
+          ./mvnw \
+            --batch-mode \
+            --show-version \
+            --strict-checksums \
+            --errors \
+            --no-transfer-progress \
+            ${PROFILE_ARGS} \
+            verify
+
+      - name: Save downloaded Maven packages
+        uses: actions/cache/save@v6.1.0
+        with:
+          path: ~/.m2
+          key: ${{ steps.restore-maven-package-cache.outputs.cache-primary-key }}
+        if: github.event.workflow_run.event != 'pull_request'
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: artifacts-${{ matrix.os }}
+          path: |
+            target/distributions/*.zip
+            target/distributions/*.tar.gz
+

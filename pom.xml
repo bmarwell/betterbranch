@@ -23,6 +23,7 @@
     <project.java.mainModule>io.github.bmarwell.betterbranch</project.java.mainModule>
     <native.quick.build>true</native.quick.build>
     <native.skip>false</native.skip>
+    <executable-suffix />
     <binary.name>betterbranch</binary.name>
     <license.spdx.id>EUPL-1.2</license.spdx.id>
 
@@ -189,6 +190,11 @@
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>license-maven-plugin</artifactId>
           <version>2.7.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.6.1</version>
         </plugin>
 
         <plugin>
@@ -407,6 +413,29 @@
       </plugin>
 
       <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-jreleaser-archive</id>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/jreleaser/assemble/${project.artifactId}/java-archive/${project.artifactId}-${project.version}.tar.gz</file>
+                  <type>tar.gz</type>
+                  <classifier>distribution</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <groupId>org.graalvm.buildtools</groupId>
         <artifactId>native-maven-plugin</artifactId>
         <extensions>true</extensions>
@@ -428,7 +457,9 @@
           </jvmArgs>
 
           <buildArgs>
+            <buildArg>--future-defaults=all</buildArg>
             <buildArg>--no-fallback</buildArg>
+            <buildArg>-R:MaxHeapSize=128m</buildArg>
           </buildArgs>
 
           <systemProperties>
@@ -443,6 +474,38 @@
               <goal>compile-no-fork</goal>
             </goals>
             <phase>package</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>assemble-native-distribution</id>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration combine.self="merge">
+              <skipAssembly>${native.skip}</skipAssembly>
+              <appendAssemblyId>false</appendAssemblyId>
+              <!-- Use nisse.os.classifier from Maveniverse Nisse extension
+                   to create platform-specific distribution names like:
+                   - betterbranch-0.1.0-SNAPSHOT-linux-x86_64.zip
+                   - betterbranch-0.1.0-SNAPSHOT-osx-x86_64.zip
+                   - betterbranch-0.1.0-SNAPSHOT-osx-aarch_64.zip
+                   - betterbranch-0.1.0-SNAPSHOT-windows-x86_64.zip
+
+                   This naming matches the expectations in jreleaser.toml distributions.
+              -->
+              <finalName>${project.artifactId}-${project.version}-${nisse.os.classifier}</finalName>
+              <descriptors>
+                <descriptor>src/main/assembly/assembly-native.xml</descriptor>
+              </descriptors>
+              <outputDirectory>${project.build.directory}/distributions</outputDirectory>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -491,6 +554,19 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+
+    <profile>
+      <id>dist-windows</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <properties>
+        <!-- not used in POM, but used in assembly descriptors -->
+        <executable-suffix>.exe</executable-suffix>
+      </properties>
     </profile>
   </profiles>
 
