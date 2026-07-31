@@ -306,7 +306,6 @@
 
           <buildArgs>
             <buildArg>--no-fallback</buildArg>
-            <buildArg>-Ob</buildArg>
           </buildArgs>
 
           <systemProperties>

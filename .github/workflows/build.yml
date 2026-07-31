@@ -28,7 +28,7 @@ jobs:
 
       - name: Build and test all
         shell: bash
-        run: ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress spotless:check verify --define native.skip=true
+        run: ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress spotless:check verify -Dnative.skip=true
 
   call-native:
     if: github.event_name != 'push' || (contains(github.event.head_commit.message, 'Releasing version') != true && contains(github.event.head_commit.message, 'Prepare next version') != true)

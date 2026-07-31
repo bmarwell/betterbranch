@@ -49,7 +49,7 @@ jobs:
       - name: Build native executable
         shell: bash
         run: |
-          ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress package
+          ./mvnw --batch-mode --show-version --strict-checksums --errors --no-transfer-progress -Dnative.quick.build=false package
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7.0.1
