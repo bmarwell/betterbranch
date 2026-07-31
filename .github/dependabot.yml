@@ -1,11 +1,12 @@
 version: 2
-cooldown:
-  default-days: 7
+
 updates:
   - package-ecosystem: maven
     directory: "/"
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       monthly-batch:
         patterns:
@@ -14,6 +15,8 @@ updates:
     directory: "/"
     schedule:
       interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       monthly-batch:
         patterns:
