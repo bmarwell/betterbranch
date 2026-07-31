@@ -46,15 +46,6 @@ jobs:
             spotless:check verify \
             -Dnative.skip=true
 
-      - name: Upload JAR archive artifact
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: betterbranch-jar-archive
-          path: |
-            cli/target/jreleaser/assemble/betterbranch/java-archive/*.zip
-            cli/target/jreleaser/assemble/betterbranch/java-archive/*.tar.gz
-          retention-days: 1
-
       - name: Save downloaded Maven packages
         uses: actions/cache/save@v6.1.0
         with:
