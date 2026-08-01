@@ -94,7 +94,7 @@ image::.github/assets/2026-07-31_betterbranch_screenshot.png["Screenshot of Bett
 [[building-from-source]]
 == Building from Source
 
-If you prefer to build the binary yourself, you need GraalVM 22+ (or any version that supports native image generation).
+If you prefer to build the binary yourself, you need GraalVM 25+ (or any version that supports native image generation).
 
 === Clone the repository
 

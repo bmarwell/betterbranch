@@ -52,6 +52,16 @@ stereotype = "CLI"
     extraProperties.graalVMNativeImage = true
 
     [[distributions.betterbranch.artifacts]]
+    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-linux-aarch_64.zip"
+    platform = "linux-aarch_64"
+    extraProperties.graalVMNativeImage = true
+
+    [[distributions.betterbranch.artifacts]]
+    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-linux-aarch_64.tar.gz"
+    platform = "linux-aarch_64"
+    extraProperties.graalVMNativeImage = true
+
+    [[distributions.betterbranch.artifacts]]
     path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-windows-x86_64.zip"
     platform = "windows-x86_64"
     extraProperties.graalVMNativeImage = true
