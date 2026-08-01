@@ -49,8 +49,8 @@ jobs:
         run: |
           mkdir -p artifacts
           
-          # Move the downloaded archive artifacts to artifacts/ for JReleaser.
-          find /tmp/artifacts/ -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec mv -v {} artifacts/ \;
+          # Move all downloaded release assets to artifacts/ for JReleaser.
+          find /tmp/artifacts/ -type f -exec mv -v {} artifacts/ \;
 
       - name: Cache Maven packages
         uses: actions/cache@v6.1.0

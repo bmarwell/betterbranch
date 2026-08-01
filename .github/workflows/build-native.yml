@@ -74,6 +74,8 @@ jobs:
           path: |
             target/betterbranch*
             target/*.jar
+            target/distributions/*.zip
+            target/distributions/*.tar.gz
             target/jreleaser/assemble/betterbranch/java-archive/*.zip
             target/jreleaser/assemble/betterbranch/java-archive/*.tar.gz
 
@@ -169,4 +171,3 @@ jobs:
           path: |
             target/distributions/*.zip
             target/distributions/*.tar.gz
-
