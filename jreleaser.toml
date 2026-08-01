@@ -6,7 +6,7 @@ authors = [ "Benjamin Marwell" ]
 license = "EUPL-1.2"
 inceptionYear = "2026"
 stereotype = "CLI"
-tags = [ "java", "formatter", "cli" ]
+tags = [ "java", "git", "cli" ]
 
 links.bugTracker = "https://github.com/bmarwell/betterbranch/issues"
 links.homepage = "https://github.com/bmarwell/betterbranch"
@@ -25,38 +25,22 @@ update.enabled = true
     links = true
     hide.contributors = [ "Benjamin Marwell", "[bot]", "GitHub" ]
 
-# Release the already-built archive artifacts from the artifact download step.
-[distributions.betterbranch-archive]
-type = "JAVA_BINARY"
-stereotype = "CLI"
-
-    [[distributions.betterbranch-archive.artifacts]]
-    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}.zip"
-
-    [[distributions.betterbranch-archive.artifacts]]
-    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}.tar.gz"
-
-# Release the native binaries downloaded from CI.
-[distributions.betterbranch-native]
+# Release the raw executables downloaded from CI.
+[distributions.betterbranch]
 type = "BINARY"
 stereotype = "CLI"
 
-    [[distributions.betterbranch-native.artifacts]]
-    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-linux-x86_64.zip"
+    [[distributions.betterbranch.artifacts]]
+    path = "{{artifactsDir}}/betterbranch-linux-x86_64"
     platform = "linux-x86_64"
     extraProperties.graalVMNativeImage = true
 
-    [[distributions.betterbranch-native.artifacts]]
-    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-linux-x86_64.tar.gz"
-    platform = "linux-x86_64"
-    extraProperties.graalVMNativeImage = true
-
-    [[distributions.betterbranch-native.artifacts]]
-    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-windows-x86_64.zip"
-    platform = "windows-x86_64"
-    extraProperties.graalVMNativeImage = true
-
-    [[distributions.betterbranch-native.artifacts]]
-    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-osx-aarch_64.zip"
+    [[distributions.betterbranch.artifacts]]
+    path = "{{artifactsDir}}/betterbranch-osx-aarch_64"
     platform = "osx-aarch_64"
+    extraProperties.graalVMNativeImage = true
+
+    [[distributions.betterbranch.artifacts]]
+    path = "{{artifactsDir}}/betterbranch-windows-x86_64.exe"
+    platform = "windows-x86_64"
     extraProperties.graalVMNativeImage = true
