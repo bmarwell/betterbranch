@@ -37,7 +37,7 @@ jobs:
           cache: maven
 
       # Using third-party action because actions/download-artifact@v5 cannot download from different workflow runs (workflow_run context).
-      - name: Download native binary artifacts from Build workflow
+      - name: Download build artifacts from Build workflow
         uses: dawidd6/action-download-artifact@v21
         with:
           run_id: ${{ github.event.workflow_run.id }}
@@ -49,7 +49,7 @@ jobs:
         run: |
           mkdir -p artifacts
           
-          # Move betterbranch distribution artifacts to artifacts/ directory for JReleaser. Names use platform classifiers from os-detector-maven-plugin.
+          # Move build artifacts to artifacts/ directory for JReleaser.
           find /tmp/artifacts/ -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec mv -v {} artifacts/ \;
 
       - name: Cache Maven packages
@@ -68,9 +68,8 @@ jobs:
             --errors \
             --non-recursive \
             -Prelease \
-            package -DskipTests jreleaser:full-release \
-            -DartifactsDir=artifacts \
-            -Dnative.skip=true
+            jreleaser:full-release \
+            -DartifactsDir=artifacts
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
