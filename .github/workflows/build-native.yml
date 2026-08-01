@@ -150,7 +150,7 @@ jobs:
             verify
 
       - name: Build static native image for Windows / macOS
-        if: !startsWith(matrix.os, 'ubuntu-')
+        if: ${{ !startsWith(matrix.os, 'ubuntu-') }}
         shell: bash
         run: |
           PROFILE_ARGS=""
