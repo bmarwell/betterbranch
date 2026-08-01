@@ -94,6 +94,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - target: linux-aarch64
+            os: ubuntu-24.04-arm
+            arch: aarch64
           - target: macos-aarch64
             os: macos-14
             arch: aarch64
@@ -124,8 +127,14 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
+      - name: Install build dependencies on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential zlib1g-dev
+
       - name: Build static native image for Linux
-        if: matrix.os == 'ubuntu-latest'
+        if: startsWith(matrix.os, 'ubuntu-')
         run: |
           PROFILE_ARGS=""
           if [ -n "${{ inputs.maven_profiles }}" ]; then
@@ -141,7 +150,7 @@ jobs:
             verify
 
       - name: Build static native image for Windows / macOS
-        if: matrix.os != 'ubuntu-latest'
+        if: !startsWith(matrix.os, 'ubuntu-')
         shell: bash
         run: |
           PROFILE_ARGS=""
