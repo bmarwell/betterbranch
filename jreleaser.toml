@@ -36,6 +36,9 @@ stereotype = "CLI"
     [[distributions.betterbranch-archive.artifacts]]
     path = "{{artifactsDir}}/betterbranch-{{projectVersion}}.tar.gz"
 
+    [[distributions.betterbranch-archive.artifacts]]
+    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}.tar.zst"
+
 # Release the native binaries downloaded from CI.
 [distributions.betterbranch]
 type = "BINARY"
@@ -52,12 +55,22 @@ stereotype = "CLI"
     extraProperties.graalVMNativeImage = true
 
     [[distributions.betterbranch.artifacts]]
+    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-linux-x86_64.tar.zst"
+    platform = "linux-x86_64"
+    extraProperties.graalVMNativeImage = true
+
+    [[distributions.betterbranch.artifacts]]
     path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-linux-aarch_64.zip"
     platform = "linux-aarch_64"
     extraProperties.graalVMNativeImage = true
 
     [[distributions.betterbranch.artifacts]]
     path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-linux-aarch_64.tar.gz"
+    platform = "linux-aarch_64"
+    extraProperties.graalVMNativeImage = true
+
+    [[distributions.betterbranch.artifacts]]
+    path = "{{artifactsDir}}/betterbranch-{{projectVersion}}-linux-aarch_64.tar.zst"
     platform = "linux-aarch_64"
     extraProperties.graalVMNativeImage = true
 
