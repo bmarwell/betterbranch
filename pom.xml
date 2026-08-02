@@ -580,7 +580,23 @@
             <artifactId>native-maven-plugin</artifactId>
             <configuration>
               <buildArgs combine.children="append">
-                <buildArg>-O2</buildArg>
+                <!-- Unlock internal/experimental flags to suppress warnings -->
+                <buildArg>-H:+UnlockExperimentalVMOptions</buildArg>
+
+                <!-- Optimization level for max dead-code elimination -->
+                <buildArg>-Os</buildArg>
+
+                <!-- Disable debug symbols -->
+                <buildArg>-H:GenerateDebugInfo=0</buildArg>
+
+                <!-- Disable frame pointers to reduce machine code size -->
+                <buildArg>-H:-PreserveFramePointer</buildArg>
+
+                <!-- Strip local symbols and source file metadata -->
+                <buildArg>-H:-DeleteLocalSymbols</buildArg>
+
+                <!-- Strip unused locale bundles -->
+                <buildArg>-H:-IncludeAllLocales</buildArg>
               </buildArgs>
             </configuration>
           </plugin>
