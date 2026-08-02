@@ -20,7 +20,7 @@ jobs:
   # so we can skip win/mac if it doesn't.
   build-linux-x64:
     name: Build Linux x64
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout repository
@@ -95,7 +95,7 @@ jobs:
       matrix:
         include:
           - target: linux-aarch64
-            os: ubuntu-24.04-arm
+            os: ubuntu-22.04-arm
             arch: aarch64
           - target: macos-aarch64
             os: macos-14
