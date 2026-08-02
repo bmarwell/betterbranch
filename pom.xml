@@ -409,6 +409,7 @@
                   <formats>
                     <format>ZIP</format>
                     <format>TAR_GZ</format>
+                    <format>TAR_ZST</format>
                   </formats>
                   <options>
                     <longFileMode>POSIX</longFileMode>
