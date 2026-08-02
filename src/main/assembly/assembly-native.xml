@@ -6,6 +6,7 @@
   <id>native</id>
   <formats>
     <format>tar.gz</format>
+    <format>tar.zst</format>
     <format>zip</format>
   </formats>
   <fileSets>
