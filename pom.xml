@@ -513,6 +513,7 @@
           <buildArgs>
             <buildArg>--future-defaults=all</buildArg>
             <buildArg>--no-fallback</buildArg>
+            <buildArg>-H:+AddAllCharsets</buildArg>
             <buildArg>-R:MaxHeapSize=128m</buildArg>
           </buildArgs>
 
